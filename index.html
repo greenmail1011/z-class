@@ -28,7 +28,7 @@
   .bar{height:10px;background:var(--no);border-radius:5px;overflow:hidden;min-width:100px}
   .bar i{display:block;height:100%;background:var(--ok)}
   .up{color:#b45309;font-weight:700;font-size:.85rem}
-  .plink{color:var(--ink);text-decoration:none}
+  .plink{color:var(--acc);text-decoration:none}
   .plink:hover{text-decoration:underline}
   .chk{display:inline-block;min-width:24px;border-radius:6px;background:var(--okbg);color:#0a7a0a;font-weight:700}
   .chk.new{background:#fff3d6;color:#9a5b00;border:1px solid var(--hot)}
@@ -104,7 +104,7 @@ rows.forEach(function(r){shown++;if(r.n!==lastN){rk=shown;lastN=r.n;}
   CODERS.forEach(function(c){h+='<th style="text-align:center">'+who(c)+'</th>';});
   h+='<th style="text-align:center">完成人數</th></tr></thead><tbody>';
   for(var n=DL;n<=DH;n++){
-    var cnt=0,row='<tr><td class="n">'+pid(n)+'</td><td><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+TITLES[n-DL]+'</a></td>';
+    var cnt=0,row='<tr><td class="n"><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a></td><td><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+TITLES[n-DL]+'</a></td>';
     CODERS.forEach(function(c){var ok=last.sets[c.id][n],isNew=prev&&ok&&!prev.sets[c.id][n];if(ok)cnt++;
       row+='<td style="text-align:center">'+(ok?'<span class="chk'+(isNew?' new':'')+'">✓</span>':'<span class="dash">·</span>')+'</td>';});
     h+=row+'<td class="n" style="text-align:center">'+cnt+' / '+CODERS.length+'</td></tr>';
