@@ -18,6 +18,7 @@
   .feed ul{margin:0;padding-left:20px}
   .empty{color:var(--muted)}
   .nm{font-weight:700;color:var(--acc);text-decoration:none}
+  .demo{font-size:.72rem;padding:0 6px;border-radius:5px;background:#eef0f4;color:#667085;font-weight:400;border:1px dashed #b8c0d0}
   .nm:hover{text-decoration:underline}
   .tag{display:inline-block;font-size:.78rem;padding:0 6px;border-radius:5px;background:var(--okbg);color:#0a7a0a;margin:0 2px;text-decoration:none;font-weight:700}
   .tag.first{background:#fff3d6;color:#9a5b00;border:1px solid #f3d38b}
@@ -50,11 +51,11 @@
 
   <h2 class="t">60 題完成表</h2>
   <div class="panel" style="overflow-x:auto"><table class="rank done" id="done"></table></div>
-  <p class="note">資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。這是靜態頁，每次重抓資料並加入一份新快照後，才會出現新的動態；動態是比對前後兩次快照得出的，不含實際解題時間。</p>
+  <p class="note">「範例」是示範用的虛擬 Coder，用來展示解題後的樣子，不計入完成人數；要拿掉時刪除 CODERS 與快照裡 id 為 0 的那一項即可。資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。這是靜態頁，每次重抓資料並加入一份新快照後，才會出現新的動態；動態是比對前後兩次快照得出的，不含實際解題時間。</p>
 </div>
 <script>
 var BASE="https://fzt-judge.com/";
-var CODERS=[{id:49,name:"梁桂翎"},{id:71,name:"劉以謙"},{id:57,name:"張仁瑋"},{id:48,name:"謝泰泓"},{id:50,name:"黃以翔"}];
+var CODERS=[{id:49,name:"梁桂翎"},{id:71,name:"劉以謙"},{id:57,name:"張仁瑋"},{id:48,name:"謝泰泓"},{id:50,name:"黃以翔"},{id:0,name:"閃身步大師",sample:true}];
 /* 每次更新：在最後面加一筆快照（時間 + 每人的已通過題號，連號可寫 b001-b042） */
 var SNAPSHOTS=[
  {t:"2026-11-15 05:10",ac:{
@@ -62,13 +63,14 @@ var SNAPSHOTS=[
   71:"b001-b033 b039 b099-b108 b110-b125 b130-b132 b134-b135 b138-b146 b150 b156-b165 b168-b171 b174-b178 b180-b181 b183",
   57:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
   48:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183"}}
+  50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  0:"b001-b042 b213-b232 b234 b236 b240 b243-b247 b253-b257"}}
 ];
 var TITLES=["小熊存錢買腳踏車", "幸運數字和", "細菌大爆炸", "吃不完的巧克力", "收銀機小幫手", "火箭倒數", "爬井的蝸牛", "越領越多的零用錢", "神奇的數字變身", "這是幾位數", "雲霄飛車身高限制", "電影票價", "寄包裹運費", "跳繩冠軍", "閏年與平年", "今天穿什麼", "拍手跳跳報數遊戲", "買飲料找零", "剪刀石頭布", "木棒三角形", "數羊睡覺", "九九乘法表", "幸運偶數號碼", "聖誕樹星星", "分糖果有幾種分法", "排隊有幾種排法", "兔子繁殖", "寶箱密碼是質數嗎", "黑白棋盤", "攝氏轉華氏表", "一週最高溫", "全班平均分數", "及格的人有幾個", "倒著排隊", "身高最高的是第幾個", "越來越熱的日子", "單數座位的點數", "失物招領", "擲骰子統計", "對稱的珠子項鍊", "成績單等第統計", "拍手報數遊戲", "零用錢日記", "班長選舉計票", "幸運號碼總和", "猜數字遊戲", "水庫警戒水位", "成績輸入小幫手", "數字裡的奇偶", "找零用的硬幣", "跳高比賽的亞軍", "比平均高的人", "連續升溫最久幾天", "合起來剛好的兩張牌", "補考名單", "數字三角形", "自己訂的乘法表", "同學互相握手", "方格的對角線", "質數寶藏表"];
 var DL=213,DH=272;
 function pid(n){return "b"+String(n).padStart(3,"0");}
 function expand(s){var o={};(s||"").split(/\s+/).forEach(function(t){var m=t.match(/^b(\d+)(?:-b(\d+))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;for(var i=a;i<=b;i++)o[i]=1;});return o;}
-function who(c){return '<a class="nm" target="_blank" rel="noopener" href="'+BASE+'UserStatistic?id='+c.id+'">'+c.name+'</a>';}
+function who(c){if(c.sample)return '<span class="nm">'+c.name+'</span> <span class="demo">範例</span>';return '<a class="nm" target="_blank" rel="noopener" href="'+BASE+'UserStatistic?id='+c.id+'">'+c.name+'</a>';}
 function link(n,cls){return '<a class="'+cls+'" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a>';}
 var snaps=SNAPSHOTS.map(function(s){var sets={};CODERS.forEach(function(c){sets[c.id]=expand(s.ac[c.id]);});return {t:s.t,sets:sets};});
 var last=snaps[snaps.length-1],prev=snaps.length>1?snaps[snaps.length-2]:null;
@@ -105,9 +107,9 @@ rows.forEach(function(r){shown++;if(r.n!==lastN){rk=shown;lastN=r.n;}
   h+='<th style="text-align:center">完成人數</th></tr></thead><tbody>';
   for(var n=DL;n<=DH;n++){
     var cnt=0,row='<tr><td class="n"><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a></td><td><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+TITLES[n-DL]+'</a></td>';
-    CODERS.forEach(function(c){var ok=last.sets[c.id][n],isNew=prev&&ok&&!prev.sets[c.id][n];if(ok)cnt++;
+    CODERS.forEach(function(c){var ok=last.sets[c.id][n],isNew=prev&&ok&&!prev.sets[c.id][n];if(ok&&!c.sample)cnt++;
       row+='<td style="text-align:center">'+(ok?'<span class="chk'+(isNew?' new':'')+'">✓</span>':'<span class="dash">·</span>')+'</td>';});
-    h+=row+'<td class="n" style="text-align:center">'+cnt+' / '+CODERS.length+'</td></tr>';
+    h+=row+'<td class="n" style="text-align:center">'+cnt+' / '+CODERS.filter(function(c){return !c.sample;}).length+'</td></tr>';
   }
   t.innerHTML=h+'</tbody>';
 })();
