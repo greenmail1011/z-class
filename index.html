@@ -5,30 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coder 解題一覽｜FZT Judge</title>
 <style>
-  :root{--bg:#f5f7fb;--ink:#1c2433;--muted:#667085;--line:#d9e0ec;--ok:#00bb00;--okbg:#e4f7e4;--no:#eef0f4;--acc:#4d6aa8}
+  :root{--bg:#f5f7fb;--ink:#1c2433;--muted:#667085;--line:#d9e0ec;--ok:#00bb00;--okbg:#e4f7e4;--no:#eef0f4;--acc:#4d6aa8;--hot:#f59e0b}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;line-height:1.6}
   .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
   h1{margin:0 0 4px;font-size:1.7rem}
+  h2.t{margin:28px 0 10px;font-size:1.2rem}
   .sub{color:var(--muted);margin:0 0 18px}
-  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
-  .tools label{font-size:.95rem}
-  select,input[type=search]{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
-  table.sum{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:24px}
-  table.sum th,table.sum td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line)}
-  table.sum th{background:#eef2f9;font-size:.9rem}
-  table.sum td.n{font-variant-numeric:tabular-nums}
-  .bar{height:8px;background:var(--no);border-radius:4px;overflow:hidden;min-width:80px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px}
+  .feed-day{margin:6px 0 2px;font-size:.85rem;color:var(--muted);font-weight:700}
+  .feed li{margin:3px 0}
+  .feed ul{margin:0;padding-left:20px}
+  .empty{color:var(--muted)}
+  .nm{font-weight:700}
+  .tag{display:inline-block;font-size:.78rem;padding:0 6px;border-radius:5px;background:var(--okbg);color:#0a7a0a;margin:0 2px;text-decoration:none;font-weight:700}
+  .tag.first{background:#fff3d6;color:#9a5b00;border:1px solid #f3d38b}
+  table.rank{width:100%;border-collapse:collapse}
+  table.rank th,table.rank td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+  table.rank th{background:#eef2f9;font-size:.9rem}
+  table.rank td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .bar{height:10px;background:var(--no);border-radius:5px;overflow:hidden;min-width:100px}
   .bar i{display:block;height:100%;background:var(--ok)}
+  .up{color:#b45309;font-weight:700;font-size:.85rem}
+  .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:20px 0 12px}
+  select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
   .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
-  .card h2{margin:0 0 2px;font-size:1.2rem}
+  .card h3{margin:0 0 2px;font-size:1.15rem}
   .card .meta{color:var(--muted);font-size:.9rem;margin-bottom:10px}
   .card .meta a{color:var(--acc)}
-  .sec{margin:10px 0 4px;font-size:.85rem;color:var(--muted);font-weight:700}
   .chips{display:flex;flex-wrap:wrap;gap:4px}
   .chips a{font-size:.78rem;padding:1px 6px;border-radius:5px;text-decoration:none;font-variant-numeric:tabular-nums;border:1px solid transparent}
   .chips a.ok{background:var(--okbg);color:#0a7a0a;border-color:#bfe8bf;font-weight:700}
   .chips a.no{background:var(--no);color:#8a93a6}
+  .chips a.new{background:#fff3d6;color:#9a5b00;border-color:var(--hot)}
   body.only-ok .chips a.no{display:none}
   body.only-no .chips a.ok{display:none}
   .note{color:var(--muted);font-size:.85rem;margin-top:24px}
@@ -37,49 +46,78 @@
 <body>
 <div class="wrap">
   <h1>Coder 解題一覽</h1>
-  <p class="sub">資料更新：<span id="stamp"></span>　綠色＝已通過（AC），灰色＝尚未通過。點題號開啟題目。</p>
+  <p class="sub">資料更新：<span id="stamp"></span>　綠色＝已通過，灰色＝未通過，橘色＝最近一次更新新解的題。點題號開啟題目。</p>
+
+  <h2 class="t">最新動態</h2>
+  <div class="panel feed" id="feed"></div>
+
+  <h2 class="t">生活情境 DAILY 排行（b213～b272，共 60 題）</h2>
+  <div class="panel"><table class="rank" id="rank"><thead><tr><th>名次</th><th>Coder</th><th>已解</th><th>進度</th><th>最近一次更新</th></tr></thead><tbody></tbody></table></div>
+
   <div class="tools">
     <label>顯示：<select id="mode"><option value="all">全部題目</option><option value="ok">只看已解</option><option value="no">只看未解</option></select></label>
     <label>題目群組：<select id="grp"></select></label>
   </div>
-  <table class="sum" id="sum"><thead><tr><th>Coder</th><th>已解題數</th><th>進度（以題庫 b001～b272 計）</th><th>生活情境 DAILY（b213～b272）</th></tr></thead><tbody></tbody></table>
   <div id="cards"></div>
-  <p class="note">資料來源：各 Coder 的「UserStatistic」頁面。b184～b212 為不公開或非本批題目，仍列出以便對照；之後有人解新題，重新抓一次資料即可更新本頁。</p>
+  <p class="note">資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。這是靜態頁，每次重抓資料並加入一份新快照後，才會出現新的動態；動態是比對前後兩次快照得出的，不含實際解題時間。</p>
 </div>
 <script>
 var BASE="https://fzt-judge.com/";
-var STAMP="2026-11-15";
-var CODERS=[
- {name:"梁桂翎",id:49,ac:"b001-b042 b086-b125 b130-b135 b138-b145 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183"},
- {name:"劉以謙",id:71,ac:"b001-b033 b039 b099-b108 b110-b125 b130-b132 b134-b135 b138-b146 b150 b156-b165 b168-b171 b174-b178 b180-b181 b183"},
- {name:"張仁瑋",id:57,ac:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183"},
- {name:"謝泰泓",id:48,ac:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183"},
- {name:"黃以翔",id:50,ac:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183"}
+var CODERS=[{id:49,name:"梁桂翎"},{id:71,name:"劉以謙"},{id:57,name:"張仁瑋"},{id:48,name:"謝泰泓"},{id:50,name:"黃以翔"}];
+/* 每次更新：在最後面加一筆快照（時間 + 每人的已通過題號，連號可寫 b001-b042） */
+var SNAPSHOTS=[
+ {t:"2026-11-15 05:10",ac:{
+  49:"b001-b042 b086-b125 b130-b135 b138-b145 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  71:"b001-b033 b039 b099-b108 b110-b125 b130-b132 b134-b135 b138-b146 b150 b156-b165 b168-b171 b174-b178 b180-b181 b183",
+  57:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  48:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183"}}
 ];
 var GROUPS=[["全部","1-272"],["b001～b085","1-85"],["b086～b129","86-129"],["b130～b185 一二維題庫","130-185"],["b186～b212","186-212"],["DAILY b213～b272","213-272"]];
+var DL=213,DH=272;
 function pid(n){return "b"+String(n).padStart(3,"0");}
-function expand(s){var out={};s.split(/\s+/).forEach(function(t){var m=t.match(/^b(\d+)(?:-b(\d+))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;for(var i=a;i<=b;i++)out[i]=1;});return out;}
-function range(s){var p=s.split("-");return[+p[0],+p[1]];}
-document.getElementById("stamp").textContent=STAMP;
-var grp=document.getElementById("grp");GROUPS.forEach(function(g,i){var o=document.createElement("option");o.value=i;o.textContent=g[0];grp.appendChild(o);});
-CODERS.forEach(function(c){c.set=expand(c.ac);c.count=Object.keys(c.set).length;});
-var tb=document.querySelector("#sum tbody");
-CODERS.forEach(function(c){
-  var daily=0;for(var i=213;i<=272;i++)if(c.set[i])daily++;
+function expand(s){var o={};(s||"").split(/\s+/).forEach(function(t){var m=t.match(/^b(\d+)(?:-b(\d+))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;for(var i=a;i<=b;i++)o[i]=1;});return o;}
+function link(n,cls){return '<a class="'+cls+'" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a>';}
+var snaps=SNAPSHOTS.map(function(s){var sets={};CODERS.forEach(function(c){sets[c.id]=expand(s.ac[c.id]);});return {t:s.t,sets:sets};});
+var last=snaps[snaps.length-1],prev=snaps.length>1?snaps[snaps.length-2]:null;
+document.getElementById("stamp").textContent=last.t;
+function diff(a,b,id){var out=[];Object.keys(b.sets[id]).forEach(function(k){if(!a.sets[id][k])out.push(+k);});return out.sort(function(x,y){return x-y;});}
+
+/* 最新動態：由新到舊，每次快照與上一次比對 */
+var feed=document.getElementById("feed"),html="",any=false;
+for(var i=snaps.length-1;i>=1;i--){
+  var items="";
+  CODERS.forEach(function(c){var d=diff(snaps[i-1],snaps[i],c.id);if(d.length){
+    var tags=d.map(function(n){
+      var firstSolver=true;for(var j=0;j<i;j++){CODERS.forEach(function(o){if(snaps[j].sets[o.id][n])firstSolver=false;});}
+      return link(n,"tag"+(firstSolver?" first":""));}).join("");
+    items+='<li><span class="nm">'+c.name+'</span> 新解 '+d.length+' 題：'+tags+'</li>';any=true;}});
+  html+='<div class="feed-day">'+snaps[i-1].t+' → '+snaps[i].t+'</div>'+(items?'<ul>'+items+'</ul>':'<div class="empty">這段期間沒有人新解題</div>');
+}
+feed.innerHTML=html||'<div class="empty">目前只有一份資料，下次更新後這裡會列出誰新解了哪題。橘底題號代表該題在這次更新時是全班第一次有人解出。</div>';
+
+/* DAILY 排行 */
+function dailyCount(snap,id){var n=0;for(var k=DL;k<=DH;k++)if(snap.sets[id][k])n++;return n;}
+var rows=CODERS.map(function(c){var n=dailyCount(last,c.id),p=prev?dailyCount(prev,c.id):n;return{c:c,n:n,gain:n-p};});
+rows.sort(function(a,b){return b.n-a.n;});
+var tb=document.querySelector("#rank tbody"),rk=0,shown=0,lastN=null;
+rows.forEach(function(r){shown++;if(r.n!==lastN){rk=shown;lastN=r.n;}
   var tr=document.createElement("tr");
-  tr.innerHTML='<td><a href="#c'+c.id+'">'+c.name+'</a></td><td class="n">'+c.count+'</td><td><div class="bar"><i style="width:'+(c.count/272*100).toFixed(1)+'%"></i></div></td><td class="n">'+daily+' / 60</td>';
-  tb.appendChild(tr);
-});
-var cards=document.getElementById("cards");
+  tr.innerHTML='<td class="n">'+(r.n===0?"—":rk)+'</td><td class="nm">'+r.c.name+'</td><td class="n">'+r.n+' / 60</td><td><div class="bar"><i style="width:'+(r.n/60*100)+'%"></i></div></td><td class="n">'+(prev?(r.gain>0?'<span class="up">+'+r.gain+' 題</span>':'0'):'—')+'</td>';
+  tb.appendChild(tr);});
+
+/* 每人卡片 */
+var grp=document.getElementById("grp"),cards=document.getElementById("cards");
+GROUPS.forEach(function(g,i){var o=document.createElement("option");o.value=i;o.textContent=g[0];grp.appendChild(o);});
 function render(){
-  var r=range(GROUPS[grp.value][1]);cards.innerHTML="";
+  var p=GROUPS[grp.value][1].split("-"),a=+p[0],b=+p[1];cards.innerHTML="";
   CODERS.forEach(function(c){
+    var newSet={};if(prev)diff(prev,last,c.id).forEach(function(n){newSet[n]=1;});
     var chips="",ok=0,tot=0;
-    for(var i=r[0];i<=r[1];i++){tot++;var s=!!c.set[i];if(s)ok++;chips+='<a class="'+(s?"ok":"no")+'" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(i)+'" title="'+pid(i)+(s?" 已通過":" 未通過")+'">'+pid(i)+'</a>';}
-    var d=document.createElement("div");d.className="card";d.id="c"+c.id;
-    d.innerHTML='<h2>'+c.name+'</h2><div class="meta">此範圍已解 '+ok+' / '+tot+'　·　<a target="_blank" rel="noopener" href="'+BASE+'UserStatistic?id='+c.id+'">完整統計頁</a></div><div class="chips">'+chips+'</div>';
-    cards.appendChild(d);
-  });
+    for(var n=a;n<=b;n++){tot++;var s=!!last.sets[c.id][n];if(s)ok++;chips+=link(n,s?(newSet[n]?"ok new":"ok"):"no");}
+    var d=document.createElement("div");d.className="card";
+    d.innerHTML='<h3>'+c.name+'</h3><div class="meta">此範圍已解 '+ok+' / '+tot+'　·　<a target="_blank" rel="noopener" href="'+BASE+'UserStatistic?id='+c.id+'">完整統計頁</a></div><div class="chips">'+chips+'</div>';
+    cards.appendChild(d);});
 }
 grp.addEventListener("change",render);
 document.getElementById("mode").addEventListener("change",function(e){document.body.className=e.target.value==="all"?"":"only-"+e.target.value;});
