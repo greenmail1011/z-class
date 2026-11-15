@@ -55,7 +55,11 @@ def main():
     def get(path): return op.open(BASE + path.lstrip("/"), timeout=30).read().decode("utf-8", "replace")
     # 登入：找出含密碼欄位的表單，照表單欄位送出
     page = get("Login"); fp = Forms(); fp.feed(page)
-    form = next((f for f in fp.forms if any((i.get("type") or "").lower() == "password" for i in f["inputs"])), None)
+    # 頁面上有多個含密碼欄位的表單（註冊、改密碼…），要選「送到 Login、欄位叫 passwd」的那一個
+    def is_login(f):
+        names = {i.get("name") for i in f["inputs"]}
+        return f["method"] == "post" and (f["action"] or "").strip("/").lower() == "login" and "passwd" in names
+    form = next((f for f in fp.forms if is_login(f)), None) or next((f for f in fp.forms if any((i.get("type") or "").lower() == "password" for i in f["inputs"]) and (f["action"] or "").strip("/").lower() == "login"), None)
     if not form: sys.exit("找不到登入表單")
     fields = {}
     for i in form["inputs"]:
