@@ -1,7 +1,7 @@
 name: update-data
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -11,19 +11,26 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v4
-      - name: 抓取最新解題資料
+      - name: 每分鐘抓一次，持續約 4.5 分鐘
         env:
           FZT_USER: ${{ secrets.FZT_USER }}
           FZT_PASS: ${{ secrets.FZT_PASS }}
-        run: python3 scripts/update.py
-      - name: 有變化就提交
         run: |
-          if [ -n "$(git status --porcelain data.json)" ]; then
-            git config user.name "fzt-bot"
-            git config user.email "fzt-bot@users.noreply.github.com"
-            git add data.json
-            git commit -m "更新解題資料"
-            git push
-          fi
+          git config user.name "fzt-bot"
+          git config user.email "fzt-bot@users.noreply.github.com"
+          end=$((SECONDS+270)); ok=1
+          while true; do
+            if python3 scripts/update.py; then ok=1; else ok=0; fi
+            if [ -n "$(git status --porcelain data.json)" ]; then
+              git add data.json
+              git commit -m "更新解題資料"
+              git pull --rebase -q origin main || true
+              git push -q || echo "推送失敗，下一輪再試"
+            fi
+            [ $SECONDS -ge $end ] && break
+            sleep 60
+          done
+          [ $ok -eq 1 ]
