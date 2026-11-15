@@ -1,0 +1,29 @@
+name: update-data
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 抓取最新解題資料
+        env:
+          FZT_USER: ${{ secrets.FZT_USER }}
+          FZT_PASS: ${{ secrets.FZT_PASS }}
+        run: python3 scripts/update.py
+      - name: 有變化就提交
+        run: |
+          if [ -n "$(git status --porcelain data.json)" ]; then
+            git config user.name "fzt-bot"
+            git config user.email "fzt-bot@users.noreply.github.com"
+            git add data.json
+            git commit -m "更新解題資料"
+            git push
+          fi

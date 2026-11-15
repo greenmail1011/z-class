@@ -51,46 +51,16 @@
   <p class="sub">資料更新：<span id="stamp"></span>　點 Coder 姓名可看完整解題統計。✎ 閃爍＝正在做（已提交、還沒通過）。</p>
   <div class="tabs" role="tablist" id="tabs"></div>
   <div id="panels"></div>
-  <p class="note">「範例」是示範用的虛擬 Coder，用來展示解題後的樣子，不計入完成人數；要拿掉時刪除 CODERS 與快照裡 id 為 0 的那一項即可。姓名顯示的是各 Coder 在 fzt-judge 的暱稱，每次更新資料時一併同步。資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。這是靜態頁，每次重抓資料並加入一份新快照後，才會出現新的動態；動態是比對前後兩份快照得出的，不含實際解題時間。</p>
+  <p class="note">「範例」是示範用的虛擬 Coder，用來展示解題後的樣子，不計入完成人數；要拿掉時刪除 CODERS 與快照裡 id 為 0 的那一項即可。姓名顯示的是各 Coder 在 fzt-judge 的暱稱，每次更新資料時一併同步。資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。資料由 GitHub 每 15 分鐘自動抓取一次，頁面開著時每分鐘檢查有沒有新資料；動態是比對前後兩份快照得出的，不含實際解題時間。</p>
 </div>
 <script>
 var BASE="https://fzt-judge.com/";
-var CODERS={
-  49:{id:49,name:"Linda"},71:{id:71,name:"Daniel Liu"},57:{id:57,name:"時透無一郎"},48:{id:48,name:"roblox tai"},50:{id:50,name:"06黃以翔"},0:{id:0,name:"閃身步大師",sample:true},
-  69:{id:69,name:"方祥睿"},66:{id:66,name:"蔡忠諺"}
-};
-/* 班級頁籤：key、顯示名稱、成員 id */
-var CLASSES=[{key:"z",name:"Z班",ids:[49,71,57,48,50,0]},{key:"ad",name:"AD班",ids:[69,66]}];
-/* 每次更新：在最後面加一筆快照（時間 + 每人的已通過題號，連號可寫 b001-b042）。新加入的人在第一份快照只當基準，不算「新解」 */
-var SNAPSHOTS=[
- {t:"2026-11-15 05:10",ac:{
-  49:"b001-b042 b086-b125 b130-b135 b138-b145 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  71:"b001-b033 b039 b099-b108 b110-b125 b130-b132 b134-b135 b138-b146 b150 b156-b165 b168-b171 b174-b178 b180-b181 b183",
-  57:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  48:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  0:"b213"}},
- {t:"2026-11-15 13:05",ac:{
-  49:"b001-b042 b086-b125 b130-b135 b138-b145 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  71:"b001-b033 b039 b099-b108 b110-b125 b130-b132 b134-b135 b138-b146 b150 b156-b165 b168-b171 b174-b178 b180-b181 b183",
-  57:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  48:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  0:"b213",
-  69:"b001-b027 b029-b042 b087-b096 b098-b103 b105-b107 b109-b110 b112 b114-b116 b118-b119 b121-b125 b135-b141 b145 b148 b153 b156 b169",
-  66:"b001-b029 b031 b037-b042 b087-b111 b113-b115 b118-b125 b135-b139 b142 b156 b169"},
-  /* 進行中：已提交過、但還沒通過的 DAILY 題（UserStatistic 上粗體灰字）。沒有就不用寫 */
-  wip:{0:"b214 b215"}}
-];
-var TITLES=["小熊存錢買腳踏車", "幸運數字和", "細菌大爆炸", "吃不完的巧克力", "收銀機小幫手", "火箭倒數", "爬井的蝸牛", "越領越多的零用錢", "神奇的數字變身", "這是幾位數", "雲霄飛車身高限制", "電影票價", "寄包裹運費", "跳繩冠軍", "閏年與平年", "今天穿什麼", "拍手跳跳報數遊戲", "買飲料找零", "剪刀石頭布", "木棒三角形", "數羊睡覺", "九九乘法表", "幸運偶數號碼", "聖誕樹星星", "分糖果有幾種分法", "排隊有幾種排法", "兔子繁殖", "寶箱密碼是質數嗎", "黑白棋盤", "攝氏轉華氏表", "一週最高溫", "全班平均分數", "及格的人有幾個", "倒著排隊", "身高最高的是第幾個", "越來越熱的日子", "單數座位的點數", "失物招領", "擲骰子統計", "對稱的珠子項鍊", "成績單等第統計", "拍手報數遊戲", "零用錢日記", "班長選舉計票", "幸運號碼總和", "猜數字遊戲", "水庫警戒水位", "成績輸入小幫手", "數字裡的奇偶", "找零用的硬幣", "跳高比賽的亞軍", "比平均高的人", "連續升溫最久幾天", "合起來剛好的兩張牌", "補考名單", "數字三角形", "自己訂的乘法表", "同學互相握手", "方格的對角線", "質數寶藏表"];
+var CODERS,CLASSES,TITLES,snaps,last;
 var DL=213,DH=272;
 function pid(n){return "b"+String(n).padStart(3,"0");}
 function expand(s){if(s==null)return null;var o={};s.split(/\s+/).forEach(function(t){var m=t.match(/^b(\d+)(?:-b(\d+))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;for(var i=a;i<=b;i++)o[i]=1;});return o;}
 function who(c){if(c.sample)return '<span class="nm">'+c.name+'</span> <span class="demo">範例</span>';return '<a class="nm" target="_blank" rel="noopener" href="'+BASE+'UserStatistic?id='+c.id+'">'+c.name+'</a>';}
 function link(n,cls){return '<a class="'+cls+'" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a>';}
-var snaps=SNAPSHOTS.map(function(s){var sets={},wip={};Object.keys(s.ac).forEach(function(id){sets[id]=expand(s.ac[id]);wip[id]=expand((s.wip||{})[id])||{};});return {t:s.t,sets:sets,wip:wip};});
-var last=snaps[snaps.length-1];
-document.getElementById("stamp").textContent=last.t;
 /* 兩份快照都有此人才比對；否則視為沒有資料可比 */
 function diff(a,b,id){var A=a.sets[id],B=b.sets[id],out=[];if(!A||!B)return out;Object.keys(B).forEach(function(k){if(!A[k])out.push(+k);});return out.sort(function(x,y){return x-y;});}
 function has(a,b,id){return !!(a.sets[id]&&b.sets[id]);}
@@ -143,15 +113,32 @@ function buildPanel(cls){
   return el;
 }
 
-/* 頁籤 */
-var tabs=document.getElementById("tabs"),panels={},btns={};
-CLASSES.forEach(function(cls){
-  panels[cls.key]=buildPanel(cls);
-  var b=document.createElement("button");b.type="button";b.setAttribute("role","tab");b.textContent=cls.name;b.addEventListener("click",function(){show(cls.key);});
-  tabs.appendChild(b);btns[cls.key]=b;
-});
-function show(k){CLASSES.forEach(function(c){var on=c.key===k;panels[c.key].hidden=!on;btns[c.key].setAttribute("aria-selected",on?"true":"false");});try{history.replaceState(null,"","#"+k);}catch(e){}}
-var start=(location.hash||"").slice(1);show(panels[start]?start:CLASSES[0].key);
+function setup(d){
+  CODERS={};Object.keys(d.coders).forEach(function(k){var c=d.coders[k];CODERS[k]={id:+k,name:c.name,sample:!!c.sample};});
+  CLASSES=d.classes;TITLES=d.titles;
+  snaps=d.snapshots.map(function(s){var sets={},wip={};Object.keys(s.ac).forEach(function(id){sets[id]=expand(s.ac[id]);wip[id]=expand((s.wip||{})[id])||{};});return {t:s.t,sets:sets,wip:wip};});
+  last=snaps[snaps.length-1];
+  document.getElementById("stamp").textContent=last.t;
+}
+/* 頁籤與載入 */
+var tabs=document.getElementById("tabs"),panelsEl=document.getElementById("panels"),panels={},btns={},cur=(location.hash||"").slice(1),raw="";
+function show(k){CLASSES.forEach(function(c){var on=c.key===k;panels[c.key].hidden=!on;btns[c.key].setAttribute("aria-selected",on?"true":"false");});cur=k;try{history.replaceState(null,"","#"+k);}catch(e){}}
+function render(){
+  tabs.innerHTML="";panelsEl.innerHTML="";panels={};btns={};
+  CLASSES.forEach(function(cls){
+    panels[cls.key]=buildPanel(cls);
+    var b=document.createElement("button");b.type="button";b.setAttribute("role","tab");b.textContent=cls.name;b.addEventListener("click",function(){show(cls.key);});
+    tabs.appendChild(b);btns[cls.key]=b;
+  });
+  show(panels[cur]?cur:CLASSES[0].key);
+}
+function load(first){
+  fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.text();}).then(function(t){
+    if(t===raw)return;raw=t;setup(JSON.parse(t));render();
+  }).catch(function(){if(first)panelsEl.innerHTML='<div class="panel empty">讀不到 data.json。請用網址開啟本頁（不要直接開檔案）。</div>';});
+}
+load(true);
+setInterval(load,60000); /* 每分鐘檢查一次，有新資料就自動更新畫面 */
 </script>
 </body>
 </html>
