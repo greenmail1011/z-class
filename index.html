@@ -12,6 +12,10 @@
   h1{margin:0 0 4px;font-size:1.7rem}
   h2.t{margin:28px 0 10px;font-size:1.2rem}
   .sub{color:var(--muted);margin:0 0 18px}
+  .tabs{display:flex;gap:8px;margin:0 0 4px;border-bottom:2px solid var(--line)}
+  .tabs button{font:inherit;font-weight:700;padding:8px 22px;border:1px solid var(--line);border-bottom:none;border-radius:10px 10px 0 0;background:#e9edf5;color:var(--muted);cursor:pointer;margin-bottom:-2px}
+  .tabs button[aria-selected=true]{background:#fff;color:var(--ink);border-bottom:2px solid #fff}
+  .tabs button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
   .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px}
   .feed-day{margin:6px 0 2px;font-size:.85rem;color:var(--muted);font-weight:700}
   .feed li{margin:3px 0}
@@ -42,21 +46,19 @@
 <div class="wrap">
   <h1>Coder 解題一覽</h1>
   <p class="sub">資料更新：<span id="stamp"></span>　點 Coder 姓名可看完整解題統計。</p>
-
-  <h2 class="t">最新動態</h2>
-  <div class="panel feed" id="feed"></div>
-
-  <h2 class="t">生活情境 DAILY 排行（b213～b272，共 60 題）</h2>
-  <div class="panel"><table class="rank" id="rank"><thead><tr><th>名次</th><th>Coder</th><th>已解</th><th>進度</th><th>最近一次更新</th></tr></thead><tbody></tbody></table></div>
-
-  <h2 class="t">60 題完成表</h2>
-  <div class="panel" style="overflow-x:auto"><table class="rank done" id="done"></table></div>
-  <p class="note">「範例」是示範用的虛擬 Coder，用來展示解題後的樣子，不計入完成人數；要拿掉時刪除 CODERS 與快照裡 id 為 0 的那一項即可。姓名顯示的是各 Coder 在 fzt-judge 的暱稱，每次更新資料時一併同步。資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。這是靜態頁，每次重抓資料並加入一份新快照後，才會出現新的動態；動態是比對前後兩次快照得出的，不含實際解題時間。</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="panels"></div>
+  <p class="note">「範例」是示範用的虛擬 Coder，用來展示解題後的樣子，不計入完成人數；要拿掉時刪除 CODERS 與快照裡 id 為 0 的那一項即可。姓名顯示的是各 Coder 在 fzt-judge 的暱稱，每次更新資料時一併同步。資料來源：各 Coder 在 fzt-judge 的 UserStatistic 頁面。這是靜態頁，每次重抓資料並加入一份新快照後，才會出現新的動態；動態是比對前後兩份快照得出的，不含實際解題時間。</p>
 </div>
 <script>
 var BASE="https://fzt-judge.com/";
-var CODERS=[{id:49,name:"Linda"},{id:71,name:"Daniel Liu"},{id:57,name:"時透無一郎"},{id:48,name:"roblox tai"},{id:50,name:"06黃以翔"},{id:0,name:"閃身步大師",sample:true}];
-/* 每次更新：在最後面加一筆快照（時間 + 每人的已通過題號，連號可寫 b001-b042） */
+var CODERS={
+  49:{id:49,name:"Linda"},71:{id:71,name:"Daniel Liu"},57:{id:57,name:"時透無一郎"},48:{id:48,name:"roblox tai"},50:{id:50,name:"06黃以翔"},0:{id:0,name:"閃身步大師",sample:true},
+  69:{id:69,name:"方祥睿"},66:{id:66,name:"蔡忠諺"}
+};
+/* 班級頁籤：key、顯示名稱、成員 id */
+var CLASSES=[{key:"z",name:"Z班",ids:[49,71,57,48,50,0]},{key:"ad",name:"AD班",ids:[69,66]}];
+/* 每次更新：在最後面加一筆快照（時間 + 每人的已通過題號，連號可寫 b001-b042）。新加入的人在第一份快照只當基準，不算「新解」 */
 var SNAPSHOTS=[
  {t:"2026-11-15 05:10",ac:{
   49:"b001-b042 b086-b125 b130-b135 b138-b145 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
@@ -64,55 +66,86 @@ var SNAPSHOTS=[
   57:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
   48:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
   50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
-  0:"b213"}}
+  0:"b213"}},
+ {t:"2026-11-15 13:05",ac:{
+  49:"b001-b042 b086-b125 b130-b135 b138-b145 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  71:"b001-b033 b039 b099-b108 b110-b125 b130-b132 b134-b135 b138-b146 b150 b156-b165 b168-b171 b174-b178 b180-b181 b183",
+  57:"b001-b003 b005-b042 b086-b097 b099-b122 b124-b125 b130-b135 b137-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  48:"b001-b039 b086-b110 b116-b125 b130-b135 b138-b143 b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  50:"b001-b042 b086-b097 b099-b125 b130-b135 b138-b146 b149-b150 b153-b165 b168-b171 b174-b178 b180-b183",
+  0:"b213",
+  69:"b001-b027 b029-b042 b087-b096 b098-b103 b105-b107 b109-b110 b112 b114-b116 b118-b119 b121-b125 b135-b141 b145 b148 b153 b156 b169",
+  66:"b001-b029 b031 b037-b042 b087-b111 b113-b115 b118-b125 b135-b139 b142 b156 b169"}}
 ];
 var TITLES=["小熊存錢買腳踏車", "幸運數字和", "細菌大爆炸", "吃不完的巧克力", "收銀機小幫手", "火箭倒數", "爬井的蝸牛", "越領越多的零用錢", "神奇的數字變身", "這是幾位數", "雲霄飛車身高限制", "電影票價", "寄包裹運費", "跳繩冠軍", "閏年與平年", "今天穿什麼", "拍手跳跳報數遊戲", "買飲料找零", "剪刀石頭布", "木棒三角形", "數羊睡覺", "九九乘法表", "幸運偶數號碼", "聖誕樹星星", "分糖果有幾種分法", "排隊有幾種排法", "兔子繁殖", "寶箱密碼是質數嗎", "黑白棋盤", "攝氏轉華氏表", "一週最高溫", "全班平均分數", "及格的人有幾個", "倒著排隊", "身高最高的是第幾個", "越來越熱的日子", "單數座位的點數", "失物招領", "擲骰子統計", "對稱的珠子項鍊", "成績單等第統計", "拍手報數遊戲", "零用錢日記", "班長選舉計票", "幸運號碼總和", "猜數字遊戲", "水庫警戒水位", "成績輸入小幫手", "數字裡的奇偶", "找零用的硬幣", "跳高比賽的亞軍", "比平均高的人", "連續升溫最久幾天", "合起來剛好的兩張牌", "補考名單", "數字三角形", "自己訂的乘法表", "同學互相握手", "方格的對角線", "質數寶藏表"];
 var DL=213,DH=272;
 function pid(n){return "b"+String(n).padStart(3,"0");}
-function expand(s){var o={};(s||"").split(/\s+/).forEach(function(t){var m=t.match(/^b(\d+)(?:-b(\d+))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;for(var i=a;i<=b;i++)o[i]=1;});return o;}
+function expand(s){if(s==null)return null;var o={};s.split(/\s+/).forEach(function(t){var m=t.match(/^b(\d+)(?:-b(\d+))?$/);if(!m)return;var a=+m[1],b=m[2]?+m[2]:a;for(var i=a;i<=b;i++)o[i]=1;});return o;}
 function who(c){if(c.sample)return '<span class="nm">'+c.name+'</span> <span class="demo">範例</span>';return '<a class="nm" target="_blank" rel="noopener" href="'+BASE+'UserStatistic?id='+c.id+'">'+c.name+'</a>';}
 function link(n,cls){return '<a class="'+cls+'" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a>';}
-var snaps=SNAPSHOTS.map(function(s){var sets={};CODERS.forEach(function(c){sets[c.id]=expand(s.ac[c.id]);});return {t:s.t,sets:sets};});
-var last=snaps[snaps.length-1],prev=snaps.length>1?snaps[snaps.length-2]:null;
+var snaps=SNAPSHOTS.map(function(s){var sets={};Object.keys(s.ac).forEach(function(id){sets[id]=expand(s.ac[id]);});return {t:s.t,sets:sets};});
+var last=snaps[snaps.length-1];
 document.getElementById("stamp").textContent=last.t;
-function diff(a,b,id){var out=[];Object.keys(b.sets[id]).forEach(function(k){if(!a.sets[id][k])out.push(+k);});return out.sort(function(x,y){return x-y;});}
+/* 兩份快照都有此人才比對；否則視為沒有資料可比 */
+function diff(a,b,id){var A=a.sets[id],B=b.sets[id],out=[];if(!A||!B)return out;Object.keys(B).forEach(function(k){if(!A[k])out.push(+k);});return out.sort(function(x,y){return x-y;});}
+function has(a,b,id){return !!(a.sets[id]&&b.sets[id]);}
 
-/* 最新動態：由新到舊，每次快照與上一次比對 */
-var feed=document.getElementById("feed"),html="",any=false;
-for(var i=snaps.length-1;i>=1;i--){
-  var items="";
-  CODERS.forEach(function(c){var d=diff(snaps[i-1],snaps[i],c.id);if(d.length){
-    var tags=d.map(function(n){
-      var firstSolver=true;for(var j=0;j<i;j++){CODERS.forEach(function(o){if(snaps[j].sets[o.id][n])firstSolver=false;});}
-      return link(n,"tag"+(firstSolver?" first":""));}).join("");
-    items+='<li>'+who(c)+' 新解 '+d.length+' 題：'+tags+'</li>';any=true;}});
-  html+='<div class="feed-day">'+snaps[i-1].t+' → '+snaps[i].t+'</div>'+(items?'<ul>'+items+'</ul>':'<div class="empty">這段期間沒有人新解題</div>');
-}
-feed.innerHTML=html||'<div class="empty">目前只有一份資料，下次更新後這裡會列出誰新解了哪題。橘底題號代表該題是全班第一次有人解出。</div>';
+function buildPanel(cls){
+  var list=cls.ids.map(function(i){return CODERS[i];}).filter(function(c){return last.sets[c.id];});
+  var real=list.filter(function(c){return !c.sample;});
+  var prev=null;for(var q=snaps.length-2;q>=0;q--){if(list.some(function(c){return has(snaps[q],last,c.id);})){prev=snaps[q];break;}}
+  var h='<h2 class="t">最新動態</h2><div class="panel feed" id="feed-'+cls.key+'"></div>'
+   +'<h2 class="t">生活情境 DAILY 排行（b213～b272，共 60 題）</h2><div class="panel"><table class="rank"><thead><tr><th>名次</th><th>Coder</th><th>已解</th><th>進度</th><th>最近一次更新</th></tr></thead><tbody id="rank-'+cls.key+'"></tbody></table></div>'
+   +'<h2 class="t">60 題完成表</h2><div class="panel" style="overflow-x:auto"><table class="rank done" id="done-'+cls.key+'"></table></div>';
+  var el=document.createElement("div");el.id="panel-"+cls.key;el.setAttribute("role","tabpanel");el.innerHTML=h;
+  document.getElementById("panels").appendChild(el);
 
-/* DAILY 排行 */
-function dailyCount(snap,id){var n=0;for(var k=DL;k<=DH;k++)if(snap.sets[id][k])n++;return n;}
-var rows=CODERS.map(function(c){var n=dailyCount(last,c.id),p=prev?dailyCount(prev,c.id):n;return{c:c,n:n,gain:n-p};});
-rows.sort(function(a,b){return b.n-a.n;});
-var tb=document.querySelector("#rank tbody"),rk=0,shown=0,lastN=null;
-rows.forEach(function(r){shown++;if(r.n!==lastN){rk=shown;lastN=r.n;}
-  var tr=document.createElement("tr");
-  tr.innerHTML='<td class="n">'+(r.n===0?"—":rk)+'</td><td>'+who(r.c)+'</td><td class="n">'+r.n+' / 60</td><td><div class="bar"><i style="width:'+(r.n/60*100)+'%"></i></div></td><td class="n">'+(prev?(r.gain>0?'<span class="up">+'+r.gain+' 題</span>':'0'):'—')+'</td>';
-  tb.appendChild(tr);});
-
-/* 60 題完成表 */
-(function(){
-  var t=document.getElementById("done"),h='<thead><tr><th>題號</th><th>題目</th>';
-  CODERS.forEach(function(c){h+='<th style="text-align:center">'+who(c)+'</th>';});
-  h+='<th style="text-align:center">完成人數</th></tr></thead><tbody>';
-  for(var n=DL;n<=DH;n++){
-    var cnt=0,row='<tr><td class="n"><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+pid(n)+'</a></td><td><a class="plink" target="_blank" rel="noopener" href="'+BASE+'ShowProblem?problemid='+pid(n)+'">'+TITLES[n-DL]+'</a></td>';
-    CODERS.forEach(function(c){var ok=last.sets[c.id][n],isNew=prev&&ok&&!prev.sets[c.id][n];if(ok&&!c.sample)cnt++;
-      row+='<td style="text-align:center">'+(ok?'<span class="chk'+(isNew?' new':'')+'">✓</span>':'<span class="dash">·</span>')+'</td>';});
-    h+=row+'<td class="n" style="text-align:center">'+cnt+' / '+CODERS.filter(function(c){return !c.sample;}).length+'</td></tr>';
+  /* 最新動態 */
+  var fh="";
+  for(var i=snaps.length-1;i>=1;i--){
+    var pair=list.filter(function(c){return has(snaps[i-1],snaps[i],c.id);});
+    if(!pair.length)continue;
+    var items="";
+    pair.forEach(function(c){var d=diff(snaps[i-1],snaps[i],c.id);if(d.length){
+      var tags=d.map(function(n){var first=true;for(var j=0;j<i;j++)list.forEach(function(o){if(snaps[j].sets[o.id]&&snaps[j].sets[o.id][n])first=false;});return link(n,"tag"+(first?" first":""));}).join("");
+      items+='<li>'+who(c)+' 新解 '+d.length+' 題：'+tags+'</li>';}});
+    fh+='<div class="feed-day">'+snaps[i-1].t+' → '+snaps[i].t+'</div>'+(items?'<ul>'+items+'</ul>':'<div class="empty">這段期間沒有人新解題</div>');
   }
-  t.innerHTML=h+'</tbody>';
-})();
+  document.getElementById("feed-"+cls.key).innerHTML=fh||'<div class="empty">目前只有一份資料，下次更新後這裡會列出誰新解了哪題。橘底題號代表該題是全班第一次有人解出。</div>';
+
+  /* DAILY 排行 */
+  function dc(snap,id){var n=0;for(var k=DL;k<=DH;k++)if(snap.sets[id]&&snap.sets[id][k])n++;return n;}
+  var rows=list.map(function(c){var n=dc(last,c.id);return{c:c,n:n,gain:prev&&has(prev,last,c.id)?n-dc(prev,c.id):null};});
+  rows.sort(function(a,b){return b.n-a.n;});
+  var tb=document.getElementById("rank-"+cls.key),rk=0,shown=0,lastN=null;
+  rows.forEach(function(r){shown++;if(r.n!==lastN){rk=shown;lastN=r.n;}
+    var tr=document.createElement("tr");
+    tr.innerHTML='<td class="n">'+(r.n===0?"—":rk)+'</td><td>'+who(r.c)+'</td><td class="n">'+r.n+' / 60</td><td><div class="bar"><i style="width:'+(r.n/60*100)+'%"></i></div></td><td class="n">'+(r.gain===null?"—":(r.gain>0?'<span class="up">+'+r.gain+' 題</span>':'0'))+'</td>';
+    tb.appendChild(tr);});
+
+  /* 60 題完成表 */
+  var t=document.getElementById("done-"+cls.key),th='<thead><tr><th>題號</th><th>題目</th>';
+  list.forEach(function(c){th+='<th style="text-align:center">'+who(c)+'</th>';});
+  th+='<th style="text-align:center">完成人數</th></tr></thead><tbody>';
+  for(var n=DL;n<=DH;n++){
+    var cnt=0,u=BASE+'ShowProblem?problemid='+pid(n),row='<tr><td class="n"><a class="plink" target="_blank" rel="noopener" href="'+u+'">'+pid(n)+'</a></td><td><a class="plink" target="_blank" rel="noopener" href="'+u+'">'+TITLES[n-DL]+'</a></td>';
+    list.forEach(function(c){var ok=last.sets[c.id][n],isNew=prev&&has(prev,last,c.id)&&ok&&!prev.sets[c.id][n];if(ok&&!c.sample)cnt++;
+      row+='<td style="text-align:center">'+(ok?'<span class="chk'+(isNew?' new':'')+'">✓</span>':'<span class="dash">·</span>')+'</td>';});
+    th+=row+'<td class="n" style="text-align:center">'+cnt+' / '+real.length+'</td></tr>';
+  }
+  t.innerHTML=th+'</tbody>';
+  return el;
+}
+
+/* 頁籤 */
+var tabs=document.getElementById("tabs"),panels={},btns={};
+CLASSES.forEach(function(cls){
+  panels[cls.key]=buildPanel(cls);
+  var b=document.createElement("button");b.type="button";b.setAttribute("role","tab");b.textContent=cls.name;b.addEventListener("click",function(){show(cls.key);});
+  tabs.appendChild(b);btns[cls.key]=b;
+});
+function show(k){CLASSES.forEach(function(c){var on=c.key===k;panels[c.key].hidden=!on;btns[c.key].setAttribute("aria-selected",on?"true":"false");});try{history.replaceState(null,"","#"+k);}catch(e){}}
+var start=(location.hash||"").slice(1);show(panels[start]?start:CLASSES[0].key);
 </script>
 </body>
 </html>
