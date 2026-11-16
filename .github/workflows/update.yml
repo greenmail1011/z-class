@@ -1,7 +1,7 @@
 name: update-data
 on:
   schedule:
-    - cron: "*/5 * * * *"   # 備援；外部排程設好後可降回 */30
+    - cron: "*/30 * * * *"  # 備援；主要由 cron-job.org 每分鐘觸發
   workflow_dispatch:
 permissions:
   contents: write
